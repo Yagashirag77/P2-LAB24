@@ -52,3 +52,5 @@ Le test d'intégration Spring demande une base MySQL configurée et n'est pas la
 ## Configuration
 
 Le mot de passe `root` est prévu pour le TP en local. On peut définir `MYSQL_PASSWORD` dans un fichier `.env` à la racine avant le premier lancement. Si la base existe déjà, modifier cette variable ne change pas son mot de passe : MySQL conserve sa configuration dans le volume.
+Screen:
+<img width="2496" height="993" alt="Capture d&#39;écran 2026-11-21 104801" src="https://github.com/user-attachments/assets/ea091bff-449b-4671-8bb1-d664edba6120" />
