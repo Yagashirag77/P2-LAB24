@@ -1,66 +1,54 @@
-﻿# TP Smart Home — Docker
+﻿# Smart Home — TP Docker
 
-Le projet contient le backend Spring Boot dans `Smart_Home_back` et le frontend Angular dans `smartHome-front`.
+Application de gestion d'appareils et de catégories, avec un backend Spring Boot, un frontend Angular et une base MySQL.
 
-## Lancer l'application
+## Structure
 
-Démarrer Docker Desktop puis, dans ce dossier :
+- `Smart_Home_back/` : API Spring Boot et Dockerfile Maven/Java
+- `smartHome-front/` : application Angular servie par Nginx
+- `docker-compose.yml` : configuration des quatre services
 
-```powershell
-docker compose build
-docker compose up -d
+## Démarrage
+
+Avec Docker Desktop lancé, depuis la racine du projet :
+
+```bash
+docker compose up -d --build
 docker compose ps
-docker compose logs -f
 ```
 
-- Frontend : http://localhost
-- Backend : http://localhost:8085
-- phpMyAdmin : http://localhost:8081 (serveur `mysql`, utilisateur `root`, mot de passe `root`)
+| Service | Adresse |
+| --- | --- |
+| Application | http://localhost |
+| API | http://localhost:8085 |
+| phpMyAdmin | http://localhost:8081 |
+| MySQL | localhost:3307 |
 
-Les ports 80, 8081, 8085 et 3307 doivent être libres. MySQL conserve ses données dans le volume `mysql_data`. Les identifiants de cet exercice sont destinés au développement local.
+Dans phpMyAdmin, utiliser `root` / `root` par défaut. Le port MySQL 3307 est utilisé car le port 3306 était déjà occupé sur ma machine. Les données sont conservées dans un volume Docker.
 
-Pour arrêter les conteneurs : `docker compose down`. Pour supprimer également les données : `docker compose down -v`.
+Pour arrêter les services :
 
-## Tester l'API
+```bash
+docker compose down
+```
 
-Une fois les services démarrés, ces commandes PowerShell lisent les données sans les modifier :
+## Tests
+
+La construction du backend lance les tests unitaires des règles métier :
+
+```bash
+docker compose build backend
+```
+
+Pour consulter les données de l'API dans PowerShell :
 
 ```powershell
 Invoke-RestMethod http://localhost:8085/api/controller/categorie/
 Invoke-RestMethod http://localhost:8085/api/controller/appareil/
 ```
 
-Pour vérifier la validation, cette requête envoie un nom vide et doit retourner une erreur HTTP 400 :
+Le test d'intégration Spring demande une base MySQL configurée et n'est pas lancé pendant le build Docker.
 
-```powershell
-Invoke-RestMethod -Method Post -Uri http://localhost:8085/api/controller/categorie/ -ContentType 'application/json' -Body '{"label":""}'
-```
+## Configuration
 
-
-## Améliorations et tests
-
-Les noms vides et les appareils sans catégorie sont refusés. Une catégorie contenant des appareils ne peut pas être supprimée. La commande globale des états utilise PUT : elle modifie des données. Les erreurs renvoient un code HTTP et un message explicite.
-
-Les cinq tests unitaires des règles métier s'exécutent pendant `docker compose build backend`. Pour les lancer localement, avec Java 17 et les dépendances Maven accessibles :
-
-```powershell
-cd Smart_Home_back
-mvn -Dtest=ServiceRulesTest test
-```
-
-Le test d'intégration `AppareilApplicationTests` demande une base MySQL configurée ; il n'est pas exécuté par la construction Docker. `root` est uniquement le mot de passe de démonstration local. Pour utiliser une autre valeur, définir `MYSQL_PASSWORD` dans un fichier `.env` non suivi par Git avant la première création de la base. Changer cette variable ne modifie pas le mot de passe d'une base déjà initialisée dans le volume.
-
-## Publication Git
-
-Vérifier le contenu et les secrets avant publication, puis :
-
-```powershell
-git init
-git status
-git add .
-git diff --cached
-git commit -m "Containeriser et améliorer Smart Home"
-git branch -M main
-git remote add origin ADRESSE_DU_DEPOT
-git push -u origin main
-```
+Le mot de passe `root` est prévu pour le TP en local. On peut définir `MYSQL_PASSWORD` dans un fichier `.env` à la racine avant le premier lancement. Si la base existe déjà, modifier cette variable ne change pas son mot de passe : MySQL conserve sa configuration dans le volume.
